@@ -57,6 +57,10 @@ function App() {
     [isFakeDark]
   );
 
+  function toggleDarkMode() {
+    setIsFakeDark((isFakeDark) => !isFakeDark);
+  }
+
   return (
     /* 2) PROVIDE VALUE TO CHILD COMPONENT */
     <PostContext.Provider
@@ -66,25 +70,28 @@ function App() {
         onClearPosts: handleClearPosts,
         searchQuery,
         setSearchQuery,
+        toggleDarkMode,
       }}
     >
       <section>
-        <button
-          onClick={() => setIsFakeDark((isFakeDark) => !isFakeDark)}
-          className="btn-fake-dark-mode"
-        >
-          {isFakeDark ? "☀️" : "🌙"}
-        </button>
+        <ThemeModeButton>{isFakeDark ? "☀️" : "🌙"}</ThemeModeButton>
 
         <Header />
-
         <Main />
-
         <Archive />
-
         <Footer />
       </section>
     </PostContext.Provider>
+  );
+}
+
+function ThemeModeButton({ children }) {
+  const { toggleDarkMode } = useContext(PostContext);
+
+  return (
+    <button className="btn-fake-dark-mode" onClick={toggleDarkMode}>
+      {children}
+    </button>
   );
 }
 
