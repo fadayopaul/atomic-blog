@@ -1,6 +1,5 @@
-import { useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { faker } from "@faker-js/faker";
-import { PostProvider, PostContext } from "./PostContext";
 
 /**
  * This function creates a random post for the blog
@@ -13,18 +12,44 @@ function createRandomPost() {
   };
 }
 
+/** 1). CREATE CONTEXT API
+
+ * i. Create a new context
+ * ii. Pass in a value in the createContext(), but leave it empty or null
+ * iii. It returns a context component, (start with UpperCase)
+ * iv. Now, we can pass the value into the context provide in our JSX
+ */
+const PostContext = createContext();
+
 /**
  * This is the main App component function
  */
 function App() {
+  const [posts, setPosts] = useState(() =>
+    Array.from({ length: 30 }, () => createRandomPost())
+  );
+  const [searchQuery, setSearchQuery] = useState("");
   const [isFakeDark, setIsFakeDark] = useState(false);
 
-  function toggleDarkMode() {
-    setIsFakeDark((isFakeDark) => !isFakeDark);
+  // Derived state. These are the posts that will actually be displayed
+  const searchedPosts =
+    searchQuery.length > 0
+      ? posts.filter((post) =>
+          `${post.title} ${post.body}`
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
+        )
+      : posts;
+
+  function handleAddPost(post) {
+    setPosts((posts) => [post, ...posts]);
+  }
+
+  function handleClearPosts() {
+    setPosts([]);
   }
 
   // Whenever `isFakeDark` changes, we toggle the `fake-dark-mode` class on the HTML element (see in "Elements" dev tool).
-
   useEffect(
     function () {
       document.documentElement.classList.toggle("fake-dark-mode");
@@ -32,26 +57,39 @@ function App() {
     [isFakeDark]
   );
 
+  function toggleDarkMode() {
+    setIsFakeDark((isFakeDark) => !isFakeDark);
+  }
+
   return (
     /* 2) PROVIDE VALUE TO CHILD COMPONENT */
-    <PostProvider>
+    <PostContext.Provider
+      value={{
+        posts: searchedPosts,
+        onAddPost: handleAddPost,
+        onClearPosts: handleClearPosts,
+        searchQuery,
+        setSearchQuery,
+        toggleDarkMode,
+      }}
+    >
       <section>
-        <ThemeModeButton handleOnClick={toggleDarkMode}>
-          {isFakeDark ? "☀️" : "🌙"}
-        </ThemeModeButton>
+        <ThemeModeButton>{isFakeDark ? "☀️" : "🌙"}</ThemeModeButton>
 
         <Header />
         <Main />
         <Archive />
         <Footer />
       </section>
-    </PostProvider>
+    </PostContext.Provider>
   );
 }
 
-function ThemeModeButton({ children, handleOnClick }) {
+function ThemeModeButton({ children }) {
+  const { toggleDarkMode } = useContext(PostContext);
+
   return (
-    <button className="btn-fake-dark-mode" onClick={handleOnClick}>
+    <button className="btn-fake-dark-mode" onClick={toggleDarkMode}>
       {children}
     </button>
   );
