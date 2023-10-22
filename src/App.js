@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { faker } from "@faker-js/faker";
-import { PostProvider, PostContext } from "./PostContext";
+import { PostProvider, usePosts } from "./PostContext";
 
 /**
  * This function creates a random post for the blog
@@ -33,19 +33,18 @@ function App() {
   );
 
   return (
-    /* 2) PROVIDE VALUE TO CHILD COMPONENT */
-    <PostProvider>
-      <section>
-        <ThemeModeButton handleOnClick={toggleDarkMode}>
-          {isFakeDark ? "☀️" : "🌙"}
-        </ThemeModeButton>
+    <section>
+      <ThemeModeButton handleOnClick={toggleDarkMode}>
+        {isFakeDark ? "☀️" : "🌙"}
+      </ThemeModeButton>
 
+      <PostProvider>
         <Header />
         <Main />
         <Archive />
         <Footer />
-      </section>
-    </PostProvider>
+      </PostProvider>
+    </section>
   );
 }
 
@@ -59,7 +58,7 @@ function ThemeModeButton({ children, handleOnClick }) {
 
 function Header() {
   /* 3) CONSUMING THE CONTEXT VALUE */
-  const { onClearPosts } = useContext(PostContext);
+  const { onClearPosts } = usePosts();
 
   return (
     <header>
@@ -76,7 +75,7 @@ function Header() {
 }
 
 function SearchPosts() {
-  const { searchQuery, setSearchQuery } = useContext(PostContext);
+  const { searchQuery, setSearchQuery } = usePosts();
   return (
     <input
       value={searchQuery}
@@ -87,7 +86,7 @@ function SearchPosts() {
 }
 
 function Results() {
-  const { posts } = useContext(PostContext);
+  const { posts } = usePosts();
   return <p>🚀 {posts.length} atomic posts found</p>;
 }
 
@@ -111,7 +110,7 @@ function Posts() {
 function FormAddPost() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const { onAddPost } = useContext(PostContext);
+  const { onAddPost } = usePosts();
 
   const handleSubmit = function (e) {
     e.preventDefault();
@@ -139,7 +138,7 @@ function FormAddPost() {
 }
 
 function List() {
-  const { posts } = useContext(PostContext);
+  const { posts } = usePosts();
 
   return (
     <ul>
@@ -161,7 +160,7 @@ function Archive() {
   );
 
   const [showArchive, setShowArchive] = useState(false);
-  const { onAddPost } = useContext(PostContext);
+  const { onAddPost } = usePosts();
 
   return (
     <aside>
